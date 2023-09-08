@@ -28,13 +28,14 @@
     /* WARNING: This is just for demonstration.
         Using :global() in this way can be risky. */
     :global(.tab-selected) {
-      background-color: rgb(59 130 246);
+      background-color: rgb(3, 83, 243);
       color: rgb(255 255 255);
     }
   
     :global(.tab-unselected) {
-      background-color: rgb(255 255 255);
+      background-color: rgb(145, 142, 142);
       color: rgb(0 0 0);
+      
     }
 
     :global(.tab-panel) {

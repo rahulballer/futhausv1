@@ -7,9 +7,6 @@
 </svelte:head>
 
 <style>
-    .feed{
-    
-    }
 
 </style>
 
