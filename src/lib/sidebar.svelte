@@ -1,12 +1,12 @@
 <script>
-    import { Sidebar, SidebarWrapper, SidebarBrand, SidebarItem, SidebarGroup } from 'flowbite-svelte';
-    import { ChartPieSolid, GridSolid, MailBoxSolid, UserSolid, ArrowRightToBracketSolid, FileEditSolid } from 'flowbite-svelte-icons';
+    import { Sidebar, SidebarWrapper, SidebarBrand, SidebarItem, SidebarGroup, SidebarDropdownItem, SidebarDropdownWrapper  } from 'flowbite-svelte';
+    import { ChartPieSolid, GridSolid, ShoppingCartSolid, MailBoxSolid, UserSolid, ArrowRightToBracketSolid, FileEditSolid} from 'flowbite-svelte-icons';
     let spanClass = 'flex-1 ml-3 whitespace-nowrap';
   
     let site = {
       name: 'futhaus',
       href: '/',
-      img: '/images/flowbite-svelte-icon-logo.svg'
+      img: '/images/soccerball.webp'
     };
   </script>
   
@@ -45,11 +45,16 @@
             <ArrowRightToBracketSolid class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
           </svelte:fragment>
         </SidebarItem>
-        <SidebarItem label="Channels">
+        <SidebarDropdownWrapper label="Channels">
           <svelte:fragment slot="icon">
-            <FileEditSolid class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
+            <ShoppingCartSolid class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
           </svelte:fragment>
-        </SidebarItem>
+          <SidebarDropdownItem label="Bayern Munich" />
+          <SidebarDropdownItem label="Bundesliga" />
+          <SidebarDropdownItem label="Highlights" />
+          <SidebarDropdownItem label="Podcasts" />
+          <SidebarDropdownItem label="Fan Chat" />
+        </SidebarDropdownWrapper>
         <SidebarItem label="Announcements">
           <svelte:fragment slot="icon">
             <FileEditSolid class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />

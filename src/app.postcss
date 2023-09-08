@@ -2,3 +2,28 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root{
+    --font-family: system-ui;
+    --primary-color: #0f172a;
+    --secondary-color: #1e293b;
+    --tertiary-color: #334155;
+}
+
+body {
+    background-color: var(--primary-color);
+    background: linear-gradient(
+        180deg,
+        var(--primary-color),
+        var(--secondary-color),
+        var(--tertiary-color)
+    );
+    margin:0;
+    min-height: 100vh;
+}
+
+h1 {
+    text-align: center;
+    font-size: 3rem;
+}
+

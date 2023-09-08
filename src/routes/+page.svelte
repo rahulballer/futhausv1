@@ -1,18 +1,18 @@
 <script>
-    import Sidebar from '$lib/sidebar.svelte';
-	import Tabfeed from '$lib/tabfeed.svelte';
+	import Tabfeed from '$lib/Tabfeed.svelte';
 </script>
 
 <svelte:head>
-    <title>Feed</title>
+    <title>Page</title>
 </svelte:head>
 
 <style>
-    /* You can also add styles specific to this page */
+    .feed{
+    
+    }
+
 </style>
 
-<main>
-    <Sidebar />
+<div>
     <Tabfeed />
-    <!-- Other content of your page goes here -->
-</main>
+</div>
