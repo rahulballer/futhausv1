@@ -1,19 +1,21 @@
-const express = require('express');
-const cors = require('cors');
-const Twint = require('twint');
+import express from 'express';
+import cors from 'cors';
+import { spawn } from 'child_process';
 
 const app = express();
 app.use(cors());
 
 app.get('/tweets', (req, res) => {
-  const twint = new Twint();
-  twint.config = {
-    username: ['fabrizioromano', 'imiasanmia'],
-    tweet_mode: 'extended',
-  };
-  twint.run();
-  const tweets = twint.storage.tweets;
-  res.json(tweets);
+  const python = spawn('python', ['scrape_tweets.py']);
+
+  python.stdout.on('data', data => {
+    const tweets = JSON.parse(data.toString());
+    res.json(tweets);
+  });
+
+  python.stderr.on('data', data => {
+    console.error(data.toString());
+  });
 });
 
 app.listen(3000, () => {
