@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import {
       Tab,
       TabGroup,
@@ -6,6 +6,19 @@
       TabPanel,
       TabPanels,
     } from "@rgossiaux/svelte-headlessui";
+
+    import { onMount } from 'svelte';
+    import TweetList from './TweetList.svelte';
+
+    let tweets: { content: string }[] = [];
+
+    onMount(async () => {
+      const response = await fetch('/path/to/your/api');
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      tweets = await response.json();
+    });
   </script>
   
   <TabGroup>
