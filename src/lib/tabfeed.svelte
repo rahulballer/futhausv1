@@ -8,7 +8,6 @@
     } from "@rgossiaux/svelte-headlessui";
 
     import { onMount } from 'svelte';
-    import TweetList from './TweetList.svelte';
 
     let tweets: { content: string }[] = [];
 
