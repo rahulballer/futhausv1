@@ -1,7 +1,7 @@
 <script>
 	import '../app.postcss';
-	import Sidebar from '$lib/sidebar.svelte';
-	import Tabfeed from '$lib/Tabfeed.svelte';
+	import Sidebar from '$lib/SideBar.svelte';
+	import Tabfeed from '$lib/TabFeed.svelte';
 </script>
 
 <style>
