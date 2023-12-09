@@ -1,31 +1,46 @@
+import psycopg2
 import requests
 
-# Dictionary mapping user handles to their respective IDs
-user_ids = {
-    '@fabrizioromano': '109757081274941020',
-    # Add more accounts here, e.g., '@anotheruser': 'their_id'
-}
+def insert_tweet(cursor, user_id, username, content):
+    try:
+        cursor.execute(
+            "INSERT INTO tweets (user_id, username, content, created_at) VALUES (%s, %s, %s, NOW())",
+            (user_id, username, content)
+        )
+    except psycopg2.DatabaseError as e:
+        print(f"Error inserting tweet: {e}")
+        # You might want to handle this error more gracefully depending on your requirements
 
-# Base URL for fetching statuses
-base_url = 'https://mastodon.social/api/v1/accounts/'
+try:
+    # PostgreSQL connection details
+    conn = psycopg2.connect("postgres://postgres:postgres@localhost:5432/local")
+    cursor = conn.cursor()
 
-# Loop through the dictionary
-for user_handle, user_id in user_ids.items():
-    # Construct the full URL for each user
-    url = f"{base_url}{user_id}/statuses"
+    # Fetch Mastodon user details
+    cursor.execute("SELECT username, user_id FROM consolidated_mastodon")
+    users = cursor.fetchall()
 
-    # Make a GET request to the API
-    response = requests.get(url)
+    # Base URL for fetching statuses
+    base_url = 'https://mastodon.social/api/v1/accounts/'
 
-    # Check if the request was successful
-    if response.status_code == 200:
-        # Parse the response JSON
-        toots = response.json()
+    # Loop through the users and fetch their tweets
+    for username, user_id in users:
+        url = f"{base_url}{user_id}/statuses"
+        response = requests.get(url)
+        if response.status_code == 200:
+            tweets = response.json()
+            for tweet in tweets:
+                insert_tweet(cursor, user_id, username, tweet['content'])
+                conn.commit()  # Commit after each insert
+        else:
+            print(f"Failed to fetch tweets for {username}. Status code: {response.status_code}")
 
-        # Print the user handle and the content of each toot
-        print(f"Toots for {user_handle}:")
-        for toot in toots:
-            print(toot['content'])
-        print("\n")  # New line for better readability between users
-    else:
-        print(f"Failed to fetch toots for {user_handle}. Status code: {response.status_code}")
+except psycopg2.DatabaseError as e:
+    print(f"Database error: {e}")
+    conn.rollback()
+except requests.RequestException as e:
+    print(f"HTTP request error: {e}")
+finally:
+    if conn is not None:
+        cursor.close()
+        conn.close()

@@ -1,0 +1,1 @@
+CREATE TABLE "public"."tweets" ("id" serial NOT NULL, "username" text NOT NULL, "user_id" text NOT NULL, "content" text NOT NULL, "created_at" timestamptz NOT NULL, PRIMARY KEY ("id") , FOREIGN KEY ("username", "user_id") REFERENCES "public"."consolidated_mastodon"("username", "user_id") ON UPDATE restrict ON DELETE restrict);
