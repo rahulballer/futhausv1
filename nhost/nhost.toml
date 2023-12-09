@@ -36,6 +36,7 @@ clientUrl = 'http://localhost:3000'
 
 [auth.signUp]
 enabled = true
+disableNewUsers = false
 
 [auth.user]
 [auth.user.roles]
@@ -134,7 +135,7 @@ timeout = 60000
 enabled = false
 
 [postgres]
-version = '14.6-20230927-1'
+version = '14.6-20231018-1'
 
 [provider]
 

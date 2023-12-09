@@ -1,0 +1,1 @@
+CREATE TABLE "public"."consolidated_mastodon" ("username" text NOT NULL, "user_id" text NOT NULL, "profile_picture" text NOT NULL, PRIMARY KEY ("username","user_id") , UNIQUE ("username"), UNIQUE ("user_id"));
