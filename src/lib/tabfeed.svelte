@@ -1,39 +1,29 @@
 <script lang="ts">
-    import {
-      Tab,
-      TabGroup,
-      TabList,
-      TabPanel,
-      TabPanels,
-    } from "@rgossiaux/svelte-headlessui";
+  import {
+    Tab,
+    TabGroup,
+    TabList,
+    TabPanel,
+    TabPanels,
+  } from "@rgossiaux/svelte-headlessui";
 
-    import { onMount } from 'svelte';
+  import GlobalFeed from './GlobalFeed.svelte';
+</script>
 
-    let tweets: { content: string }[] = [];
-
-    onMount(async () => {
-      const response = await fetch('/path/to/your/api');
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      tweets = await response.json();
-    });
-  </script>
-  
-  <TabGroup>
-    <TabList>
-      <Tab class={({selected}) => selected ? "tab-selected" : "tab-unselected"}>Personal</Tab>
-      <Tab class={({selected}) => selected ? "tab-selected" : "tab-unselected"}>Social</Tab>
-      <Tab class={({selected}) => selected ? "tab-selected" : "tab-unselected"}>Global</Tab>
-      <Tab class={({selected}) => selected ? "tab-selected" : "tab-unselected"}>Trending</Tab>
-    </TabList>
-    <TabPanels>
-      <TabPanel class="tab-panel">Personal Content</TabPanel>
-      <TabPanel class="tab-panel">Social Content</TabPanel>
-      <TabPanel class="tab-panel">Global Content</TabPanel>
-      <TabPanel class="tab-panel">Trending Content</TabPanel>
-    </TabPanels>
-  </TabGroup>
+<TabGroup>
+  <TabList>
+    <Tab class={({selected}) => selected ? "tab-selected" : "tab-unselected"}>Personal</Tab>
+    <Tab class={({selected}) => selected ? "tab-selected" : "tab-unselected"}>Social</Tab>
+    <Tab class={({selected}) => selected ? "tab-selected" : "tab-unselected"}>Global</Tab>
+    <Tab class={({selected}) => selected ? "tab-selected" : "tab-unselected"}>Trending</Tab>
+  </TabList>
+  <TabPanels>
+    <TabPanel class="tab-panel">Personal Content</TabPanel>
+    <TabPanel class="tab-panel">Social Content</TabPanel>
+    <TabPanel class="tab-panel"><GlobalFeed /></TabPanel>
+    <TabPanel class="tab-panel">Trending Content</TabPanel>
+  </TabPanels>
+</TabGroup>
 
   
   <style>

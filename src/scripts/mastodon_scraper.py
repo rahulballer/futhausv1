@@ -1,11 +1,36 @@
 import psycopg2
 import requests
+import pandas as pd
+
+# Load the DataFrame from the pickle file
+df = pd.read_pickle('club_players_data.pkl')
+
+# Extract unique club and player names
+unique_club_names = df['Club Name'].unique()
+unique_player_names = df['Player Name'].unique()
+
+def keyword_matching(content, club_names, player_names):
+    # Initialize tags list
+    tags = []
+
+    # Check for club name matches
+    for club in club_names:
+        if club.lower() in content.lower():
+            tags.append(club)
+
+    # Check for player name matches
+    for player in player_names:
+        if player.lower() in content.lower():
+            tags.append(player)
+
+    return ','.join(tags)  # Returns a comma-separated string of tags
 
 def insert_tweet(cursor, user_id, username, content):
+    tags = keyword_matching(content, unique_club_names, unique_player_names)
     try:
         cursor.execute(
-            "INSERT INTO tweets (user_id, username, content, created_at) VALUES (%s, %s, %s, NOW())",
-            (user_id, username, content)
+            "INSERT INTO tweets (user_id, username, content, tags, created_at) VALUES (%s, %s, %s, %s, NOW())",
+            (user_id, username, content, tags)
         )
     except psycopg2.DatabaseError as e:
         print(f"Error inserting tweet: {e}")
