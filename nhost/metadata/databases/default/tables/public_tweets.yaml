@@ -1,3 +1,14 @@
 table:
   name: tweets
   schema: public
+object_relationships:
+  - name: consolidated_mastodon
+    using:
+      manual_configuration:
+        column_mapping:
+          user_id: user_id
+          username: username
+        insertion_order: null
+        remote_table:
+          name: consolidated_mastodon
+          schema: public

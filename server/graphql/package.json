@@ -20,9 +20,11 @@
   },
   "homepage": "https://github.com/rahulballer/futhausv1#readme",
   "dependencies": {
+    "@apollo/client": "^3.8.8",
     "@graphql-tools/schema": "^10.0.2",
     "apollo-server-express": "^3.13.0",
     "dotenv": "^16.3.1",
+    "express": "^4.18.2",
     "graphql": "^16.8.1",
     "graphql-request": "^6.1.0",
     "graphql-ws": "^5.14.2"

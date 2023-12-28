@@ -1,10 +1,23 @@
 require('dotenv').config();
+const axios = require('axios');
 const { ApolloServer, gql } = require('apollo-server-express');
 const express = require('express');
 const { createServer } = require('http');
 const { GraphQLClient } = require('graphql-request');
 const { WebSocket } = require('ws');
 const { makeExecutableSchema } = require('@graphql-tools/schema');
+
+// Load environment variables
+const {
+  VITE_HASURA_GRAPHQL_ENDPOINT,
+  VITE_HASURA_ADMIN_SECRET,
+  VITE_HASURA_WS_ENDPOINT,
+  MASTODON_ACCESS_TOKEN,
+  MASTODON_USER_ID,
+  PUBLIC_KEY,
+  AUTH_KEY
+} = process.env;
+
 
 // Check environment variables
 console.log('Hasura GraphQL Endpoint:', process.env.VITE_HASURA_GRAPHQL_ENDPOINT);
@@ -92,6 +105,55 @@ const server = new ApolloServer({
     },
   ],
 });
+
+// Define function to subscribe to Mastodon Web Push API
+const subscribeToMastodonPush = async () => {
+  try {
+    const response = await axios.post(
+      'https://mastodon.social/api/v1/push/subscription',
+      {
+        subscription: {
+          endpoint: 'https://yourserver.com/mastodon-webhook',
+          keys: {
+            p256dh: PUBLIC_KEY,
+            auth: AUTH_KEY
+          }
+        },
+        data: {
+          alerts: {
+            follow: true,
+            favourite: true,
+            reblog: true,
+            mention: true,
+            poll: true
+          }
+        }
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${MASTODON_ACCESS_TOKEN}`
+        }
+      }
+    );
+    console.log('Subscription response:', response.data);
+  } catch (error) {
+    console.error('Error subscribing to Mastodon Web Push:', error);
+  }
+};
+
+// Define Express route to handle Mastodon Web Push notifications
+app.post('/mastodon-webhook', express.json(), (req, res) => {
+  const notificationData = req.body;
+  console.log('Received Mastodon notification:', notificationData);
+
+  // Process the notification here
+  // Update your Hasura database with the notification data
+
+  res.status(200).send('Notification processed successfully');
+});
+
+// Call the function to subscribe to Mastodon Web Push API
+subscribeToMastodonPush().catch(console.error);
 
 // Start the server and apply middleware
 server.start().then(() => {
