@@ -10,7 +10,8 @@
 		"sourceMap": true,
 		"strict": true,
 		"verbatimModuleSyntax": true, // Add this line
-		"ignoreDeprecations": "5.0"  // Add this line
+		"ignoreDeprecations": "5.0",  // Add this line
+		
 	}
 	// Path aliases are handled by https://kit.svelte.dev/docs/configuration#alias
 	//

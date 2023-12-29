@@ -19,6 +19,7 @@
     "@sveltejs/adapter-auto": "^1.0.0-next.90",
     "@sveltejs/kit": "^1.0.0-next.587",
     "@types/ws": "^8.5.10",
+    "@types/zen-observable": "^0.8.7",
     "@typescript-eslint/eslint-plugin": "^5.45.0",
     "@typescript-eslint/parser": "^5.45.0",
     "autoprefixer": "^10.4.14",
@@ -45,26 +46,42 @@
     "@fortawesome/fontawesome-svg-core": "^6.4.2",
     "@fortawesome/free-solid-svg-icons": "^6.4.2",
     "@fortawesome/svelte-fontawesome": "^0.2.0",
+    "@graphql-tools/schema": "^10.0.2",
     "@nhost/nhost-js": "^2.2.17",
     "@urql/core": "^4.2.2",
     "@urql/svelte": "^4.0.4",
     "apollo-server-express": "^3.13.0",
+    "axios": "^1.6.3",
     "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "graphql": "^16.8.1",
+    "graphql-request": "^6.1.0",
+    "graphql-subscriptions": "^2.0.0",
     "graphql-ws": "^5.14.2",
     "rxjs": "^7.8.1",
     "subscriptions-transport-ws": "^0.11.0",
     "svelte-apollo": "^0.5.0",
     "twit": "^2.2.11",
-    "ws": "^8.15.1"
+    "ws": "^8.15.1",
+    "zen-observable-ts": "^1.2.5"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rahulballer/futhausv1.git"
+  },
+  "keywords": [
+    "futhaus"
+  ],
+  "author": "rahul",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/rahulballer/futhausv1/issues"
+  },
+  "homepage": "https://github.com/rahulballer/futhausv1#readme",
   "description": "",
   "main": "svelte.config.js",
   "directories": {
     "test": "tests"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  }
 }

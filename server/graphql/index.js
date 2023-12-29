@@ -1,37 +1,27 @@
-require('dotenv').config();
-const axios = require('axios');
-const { ApolloServer, gql } = require('apollo-server-express');
-const express = require('express');
-const { createServer } = require('http');
-const { GraphQLClient } = require('graphql-request');
-const { WebSocket } = require('ws');
-const { makeExecutableSchema } = require('@graphql-tools/schema');
+import dotenv from 'dotenv';
+import express from 'express';
+import { createServer } from 'http';
+import { GraphQLClient } from 'graphql-request';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import { SubscriptionServer } from 'subscriptions-transport-ws';
+import { execute, subscribe } from 'graphql';
+import { ApolloServer, gql } from 'apollo-server-express';
+import { PubSub } from 'graphql-subscriptions';
+
+// Initialize environment variables
+dotenv.config({ path: '/Users/rahulrangarajan/FootyBreak/futhaus/y/.env' });
 
 // Load environment variables
 const {
   VITE_HASURA_GRAPHQL_ENDPOINT,
-  VITE_HASURA_ADMIN_SECRET,
-  VITE_HASURA_WS_ENDPOINT,
-  MASTODON_ACCESS_TOKEN,
-  MASTODON_USER_ID,
-  PUBLIC_KEY,
-  AUTH_KEY
+  VITE_HASURA_ADMIN_SECRET
 } = process.env;
 
+// Initialize a PubSub instance
+const pubsub = new PubSub();
+const TWEETS_TOPIC = 'NEW_TWEET';
 
-// Check environment variables
-console.log('Hasura GraphQL Endpoint:', process.env.VITE_HASURA_GRAPHQL_ENDPOINT);
-console.log('Hasura Admin Secret:', process.env.VITE_HASURA_ADMIN_SECRET);
-console.log('Hasura WebSocket Endpoint:', process.env.VITE_HASURA_WS_ENDPOINT);
-
-// GraphQL client for making requests to Hasura
-const client = new GraphQLClient(process.env.VITE_HASURA_GRAPHQL_ENDPOINT, {
-  headers: {
-    'x-hasura-admin-secret': process.env.VITE_HASURA_ADMIN_SECRET,
-  },
-});
-
-// GraphQL schema definitions
+// Define your type definitions using gql
 const typeDefs = gql`
   type Tweet {
     id: Int
@@ -47,11 +37,18 @@ const typeDefs = gql`
   }
 
   type Subscription {
-    tweets: [Tweet]
+    tweetAdded: Tweet
   }
 `;
 
-// Resolvers for the defined schema
+// Define the GraphQLClient
+const client = new GraphQLClient(VITE_HASURA_GRAPHQL_ENDPOINT, {
+  headers: {
+    'x-hasura-admin-secret': VITE_HASURA_ADMIN_SECRET,
+  },
+});
+
+// Provide resolver functions for your schema fields
 const resolvers = {
   Query: {
     tweets: async () => {
@@ -75,131 +72,72 @@ const resolvers = {
     },
   },
   Subscription: {
-    tweets: {
-      subscribe: () => {
-        throw new Error('Real-time subscriptions are not yet supported in this setup.');
-      },
+    tweetAdded: {
+      subscribe: () => pubsub.asyncIterator([TWEETS_TOPIC])
     },
   },
 };
 
-// Create an executable schema
+// Create the GraphQL schema
 const schema = makeExecutableSchema({ typeDefs, resolvers });
 
-// Express application setup
 const app = express();
 const httpServer = createServer(app);
 
-// Apollo Server setup
+// Set up Apollo Server
 const server = new ApolloServer({
   schema,
-  plugins: [
-    {
-      async serverWillStart() {
-        return {
-          async drainServer() {
-            // Close the server when shutting down
-          },
-        };
-      },
-    },
-  ],
+  plugins: [{
+    async serverWillStart() {
+      return {
+        async drainServer() {
+          subscriptionServer.close();
+        }
+      };
+    }
+  }],
 });
 
-// Define function to subscribe to Mastodon Web Push API
-const subscribeToMastodonPush = async () => {
-  try {
-    const response = await axios.post(
-      'https://mastodon.social/api/v1/push/subscription',
-      {
-        subscription: {
-          endpoint: 'https://yourserver.com/mastodon-webhook',
-          keys: {
-            p256dh: PUBLIC_KEY,
-            auth: AUTH_KEY
-          }
-        },
-        data: {
-          alerts: {
-            follow: true,
-            favourite: true,
-            reblog: true,
-            mention: true,
-            poll: true
-          }
-        }
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${MASTODON_ACCESS_TOKEN}`
-        }
-      }
-    );
-    console.log('Subscription response:', response.data);
-  } catch (error) {
-    console.error('Error subscribing to Mastodon Web Push:', error);
-  }
-};
+// Function to simulate a new tweet event
+function onNewTweet(newTweet) {
+  pubsub.publish(TWEETS_TOPIC, { tweetAdded: newTweet });
+}
 
-// Define Express route to handle Mastodon Web Push notifications
-app.post('/mastodon-webhook', express.json(), (req, res) => {
-  const notificationData = req.body;
-  console.log('Received Mastodon notification:', notificationData);
-
-  // Process the notification here
-  // Update your Hasura database with the notification data
-
-  res.status(200).send('Notification processed successfully');
-});
-
-// Call the function to subscribe to Mastodon Web Push API
-subscribeToMastodonPush().catch(console.error);
-
-// Start the server and apply middleware
-server.start().then(() => {
+// Start Apollo Server and set up WebSocket server for subscriptions
+(async function startApolloServer() {
+  await server.start();
   server.applyMiddleware({ app });
 
-  // Define the server port
   const PORT = process.env.PORT || 3000;
-
-  // Start listening on the port
   httpServer.listen(PORT, () => {
     console.log(`Server is running at http://localhost:${PORT}${server.graphqlPath}`);
+
+    const subscriptionServer = SubscriptionServer.create({
+      schema,
+      execute,
+      subscribe,
+      onConnect(connectionParams, webSocket, context) {
+        console.log('Connected to websocket');
+      },
+      onDisconnect(webSocket, context) {
+        console.log('Disconnected from websocket');
+      },
+    }, {
+      server: httpServer,
+      path: server.graphqlPath,
+    });
+
+    // Simulate a new tweet event 5 seconds after the server starts
+    setTimeout(() => {
+      onNewTweet({
+        id: Date.now(),
+        content: "Hello, this is a test tweet!",
+        tags: "test",
+        user_id: "1",
+        username: "testuser",
+        created_at: new Date().toISOString()
+      });
+      console.log("Test tweet published!");
+    }, 5000);
   });
-});
-
-// WebSocket client to connect to Hasura's real-time updates
-const wsClient = new WebSocket(process.env.VITE_HASURA_WS_ENDPOINT, ['graphql-ws'], {
-  headers: {
-    'x-hasura-admin-secret': process.env.VITE_HASURA_ADMIN_SECRET,
-  },
-});
-
-wsClient.onopen = () => {
-  console.log('WebSocket Client Connected');
-  wsClient.send(JSON.stringify({
-    type: 'connection_init',
-    payload: {},
-  }));
-};
-
-wsClient.onmessage = (message) => {
-  const data = JSON.parse(message.data);
-
-  // Handle different types of messages
-  if (data.type === 'connection_ack') {
-    console.log('Connection acknowledged');
-  } else if (data.type === 'data') {
-    console.log('Data received:', data.payload);
-  } else if (data.type === 'error') {
-    console.error('Error message received:', data.payload);
-  } else if (data.type === 'ka') {
-    // Keep Alive message, no action needed
-  } else {
-    console.log('Received unknown message type:', data);
-  }
-};
-
-wsClient.onerror = (error) => {
-  console.error('WebSocket Error:', error);
-};
+})();
