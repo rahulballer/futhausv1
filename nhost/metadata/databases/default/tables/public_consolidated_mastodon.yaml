@@ -1,13 +1,3 @@
 table:
   name: consolidated_mastodon
   schema: public
-array_relationships:
-  - name: tweets
-    using:
-      foreign_key_constraint_on:
-        columns:
-          - user_id
-          - username
-        table:
-          name: tweets
-          schema: public

@@ -30,6 +30,8 @@ const typeDefs = gql`
     user_id: String
     username: String
     created_at: String
+    media_attachments: String
+    avatar: String
   }
 
   type Query {
@@ -60,6 +62,8 @@ const resolvers = {
           user_id
           username
           created_at
+          media_attachments
+          avatar
         }
       }`;
       try {

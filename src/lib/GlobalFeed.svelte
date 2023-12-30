@@ -23,6 +23,8 @@
     user_id: string;
     username: string;
     created_at: string;
+    media_attachments: string;
+    avatar: string;
   }
 
   // Local store for tweets
@@ -64,6 +66,8 @@
         user_id
         username
         created_at
+        media_attachments
+        avatar
       }
     }
   `;
@@ -78,6 +82,8 @@
         user_id
         username
         created_at
+        media_attachments
+        avatar
       }
     }
   `;
@@ -139,6 +145,8 @@ onMount(() => {
       <article>
         <h2>{tweet.username} - {new Date(tweet.created_at).toLocaleString()}</h2>
         <p>{tweet.content}</p> 
+        <p>{tweet.media_attachments}</p> 
+        <p>{tweet.avatar}</p> 
         <p>{tweet.tags}</p>
       </article>
     {/each}
