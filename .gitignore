@@ -10,3 +10,5 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .secrets
 .nhost
+src/scripts/inspired-micron-396315-ecbecb953ac5.json
+
