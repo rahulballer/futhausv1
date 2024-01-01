@@ -1,3 +1,4 @@
+import os
 import requests
 import pandas as pd
 import re
@@ -118,7 +119,9 @@ for league_url, season_id in leagues.items():
                             'Role': 'Player'}, ignore_index=True)
 
 # Use the JSON file you downloaded from Google Cloud Console
-path_to_json = '/Users/rahulrangarajan/FootyBreak/futhaus/y/src/scripts/inspired-micron-396315-ecbecb953ac5.json'
+# Use the environment variable for the JSON file
+path_to_json = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+
 
 # Authenticate using the service account file
 credentials = ServiceAccountCredentials.from_json_keyfile_name(path_to_json, ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive'])
