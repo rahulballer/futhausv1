@@ -32,7 +32,6 @@ headers = {
 }
 
 # League URLs with their corresponding season IDs
-# League URLs with their corresponding season IDs
 leagues = {
     'https://www.sofascore.com/tournament/football/germany/bundesliga/35': '52608', #bundesliga
     'https://www.sofascore.com/tournament/football/spain/laliga/8': '52376', #laliga
@@ -46,6 +45,7 @@ leagues = {
     'https://www.sofascore.com/tournament/football/portugal/liga-portugal/238': '52769', #liga portugal
     'https://www.sofascore.com/tournament/football/scotland/premiership/36': '52588', #scottish premiership
     'https://www.sofascore.com/tournament/football/saudi-arabia/saudi-pro-league/955': '53241', #saudi pro league
+    'https://www.sofascore.com/tournament/football/austria/bundesliga/45': '52524', #austria bundesliga
     'https://www.sofascore.com/tournament/football/germany/2-bundesliga/44': '52607', #2. bundesliga
     'https://www.sofascore.com/tournament/football/england/championship/18': '52367', #championship
     'https://www.sofascore.com/tournament/football/spain/laliga-2/54': '52563', #la liga 2
