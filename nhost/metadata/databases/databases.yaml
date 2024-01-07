@@ -11,4 +11,9 @@
         max_connections: 50
         retries: 1
       use_prepared_statements: true
+  logical_models:
+    - fields: []
+      name: player
+    - fields: []
+      name: player_club_tagging
   tables: "!include default/tables/tables.yaml"

@@ -1,9 +1,71 @@
-import os
 import requests
 import pandas as pd
 import re
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+from dotenv import load_dotenv
+import os
+from uuid import uuid4
+
+
+# Load the .env file
+load_dotenv('/Users/rahulrangarajan/FootyBreak/futhaus/y/.env')
+
+# Access environment variables
+HASURA_GRAPHQL_ENDPOINT = os.getenv('VITE_HASURA_GRAPHQL_ENDPOINT')
+HASURA_ADMIN_SECRET = os.getenv('VITE_HASURA_ADMIN_SECRET')
+
+# Now you can use these variables in your headers for Hasura requests
+hasura_headers = {
+    'Content-Type': 'application/json',
+    'x-hasura-admin-secret': HASURA_ADMIN_SECRET
+}
+
+# The GraphQL mutation template for inserting data
+mutation = """
+mutation insertData($objects: [sofascore_insert_input!]!) {
+  insert_sofascore(objects: $objects) {
+    returning {
+      id
+      club
+      club_url
+      club_avatar
+      league
+      league_url
+      league_avatar
+      person
+      person_url
+      person_avatar
+      person_id
+      person_country
+      role
+    }
+  }
+}
+"""
+
+# Function to insert data into Hasura
+def insert_data_to_hasura(dataframe):
+    # Convert your DataFrame to a list of dictionaries
+    data_to_insert = dataframe.to_dict(orient='records')
+    
+    # Make the request to Hasura
+    response = requests.post(
+        HASURA_GRAPHQL_ENDPOINT, 
+        json={'query': mutation, 'variables': {'objects': data_to_insert}},
+        headers=hasura_headers
+    )
+    
+    # Check for errors
+    if response.status_code == 200:
+        print("Data inserted successfully!")
+        response_data = response.json()
+        print("Response from Hasura:", response_data)
+        
+        # Check if any data is returned in the 'returning' field
+        if not response_data.get('data', {}).get('insert_sofascore', {}).get('returning'):
+            print("No data returned. Possible insertion error.")
+    else:
+        print(f"Failed to insert data: {response.text}")
+
 
 # Function to fetch and parse JSON data
 def fetch_json(url, headers):
@@ -59,7 +121,7 @@ leagues = {
 base_api_url = 'https://api.sofascore.com/api/v1/'
 
 # Initialize DataFrame
-df = pd.DataFrame(columns=['League', 'League URL', 'League Avatar', 'Club', 'Club URL', 'Club Avatar', 'Person', 'Person URL', 'Person Avatar', 'Person Country', 'Role'])
+df = pd.DataFrame(columns=['id','league', 'league_url', 'league_avatar', 'club', 'club_url', 'club_avatar', 'person', 'person_url', 'person_avatar', 'person_country', 'role', 'person_id'])
 
 # Process each league
 for league_url, season_id in leagues.items():
@@ -82,15 +144,19 @@ for league_url, season_id in leagues.items():
         team_details = fetch_json(team_details_url, headers)
         manager = team_details['team'].get('manager', {})
 
+        # Generate a unique ID for each row using uuid4
+        unique_id = str(uuid4())
+
         if manager:
             manager_avatar_url = f'{base_api_url}manager/{manager.get("id", "")}/image'
+            manager_id = manager['id']
             manager_url = f'https://www.sofascore.com/manager/{manager.get("slug", "")}/{manager.get("id", "")}'
             manager_country = manager.get('country', {}).get('name', '')
-            df = df._append({'League': league_name, 'League URL': league_url, 'League Avatar': league_avatar_url,
-                            'Club': team['name'], 'Club URL': club_url, 'Club Avatar': club_avatar_url, 
-                            'Person': manager.get('name', ''), 'Person URL': manager_url, 
-                            'Person Avatar': manager_avatar_url, 'Person Country': manager_country, 
-                            'Role': 'Manager'}, ignore_index=True)
+            df = df._append({'league': league_name, 'league_url': league_url, 'league_avatar': league_avatar_url,
+                            'club': team['name'], 'club_url': club_url, 'club_avatar': club_avatar_url, 
+                            'person': manager.get('name', ''), 'person_url': manager_url, 
+                            'person_avatar': manager_avatar_url, 'person_country': manager_country, 'person_id' : manager_id, 'id': unique_id,
+                            'role': 'Manager'}, ignore_index=True)
 
         players_url = f'{base_api_url}team/{team["id"]}/players'
         players_data = fetch_json(players_url, headers)
@@ -112,38 +178,15 @@ for league_url, season_id in leagues.items():
             player_avatar_url = f'{base_api_url}player/{player_id}/image'
             player_url = f'https://www.sofascore.com/player/{player["slug"]}/{player_id}'
             player_country = player.get('country', {}).get('name', '')
-            df = df._append({'League': league_name, 'League URL': league_url, 'League Avatar': league_avatar_url,
-                            'Club': team['name'], 'Club URL': club_url, 'Club Avatar': club_avatar_url, 
-                            'Person': player_name, 'Person URL': player_url, 
-                            'Person Avatar': player_avatar_url, 'Person Country': player_country, 
-                            'Role': 'Player'}, ignore_index=True)
+            # Generate a unique ID for each row using uuid4
+            unique_id = str(uuid4())
+            df = df._append({'league': league_name, 'league_url': league_url, 'league_avatar': league_avatar_url,
+                            'club': team['name'], 'club_url': club_url, 'club_avatar': club_avatar_url, 
+                            'person': player_name, 'person_url': player_url, 
+                            'person_avatar': player_avatar_url, 'person_country': player_country, 'person_id': player_id, 'id': unique_id,
+                            'role': 'Player'}, ignore_index=True)
 
-# Use the JSON file you downloaded from Google Cloud Console
-# Use the environment variable for the JSON file
-path_to_json = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
-
-
-# Authenticate using the service account file
-credentials = ServiceAccountCredentials.from_json_keyfile_name(path_to_json, ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive'])
-gc = gspread.authorize(credentials)
-
-# Open the Google Sheet using its URL
-sheet_url = "https://docs.google.com/spreadsheets/d/1o68j_kwMarmDWj79UaS0KbQDzkz_C4EfE8LbDn6B8gc/edit#gid=1933161530"
-sheet = gc.open_by_url(sheet_url)
-
-# Select the first sheet
-worksheet = sheet.worksheet('Club Tagging')  # Replace with the actual title
+# Put this dataframe into Hasura database
+insert_data_to_hasura(df)
 
 
-# Get the existing data from the first column
-existing_clubs = worksheet.col_values(1)
-
-# Get the unique clubs from the DataFrame
-unique_clubs = df['Club'].unique()
-
-# Append new clubs that are not in the existing_clubs
-new_clubs = [club for club in unique_clubs if club not in existing_clubs]
-
-# Update the Google Sheet with new clubs
-for club in new_clubs:
-    worksheet.append_row([club])

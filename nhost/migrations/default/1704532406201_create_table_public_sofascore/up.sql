@@ -1,0 +1,1 @@
+CREATE TABLE "public"."sofascore" ("club" text, "club_url" text, "club_avatar" text, "league" text, "league_url" text, "league_avatar" text, "person" text NOT NULL, "person_url" text, "person_avatar" text, "role" text NOT NULL, PRIMARY KEY ("person") );

@@ -1,0 +1,3 @@
+table:
+  name: person_club_tagging
+  schema: public

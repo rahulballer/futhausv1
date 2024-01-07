@@ -1,0 +1,1 @@
+CREATE TABLE "public"."club_tagging" ("club" text NOT NULL, "tags_1" text NOT NULL, "short_name" text NOT NULL, "total_tags" text NOT NULL, "not_tags" text NOT NULL, PRIMARY KEY ("club") , UNIQUE ("club"));
